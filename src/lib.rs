@@ -1,3 +1,5 @@
+mod programs; 
+
 use crate::programs::turbin3_prereq::{Turbin3PrereqProgram, CompleteArgs};
 use solana_program::system_program;
 use solana_sdk::{

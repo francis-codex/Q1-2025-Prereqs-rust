@@ -9,3 +9,4 @@ solana-client = "1.17"
 solana-program = "1.17"
 borsh = "0.10.3"
 bs58 = "0.5.0"
+solana-idlgen = { git = "https://github.com/deanmlittle/solana-idlgen.git" }
