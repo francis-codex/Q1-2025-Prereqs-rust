@@ -2,12 +2,15 @@ use solana_sdk::{
     signature::{Keypair, Signer},
 };
 use std::io::{self, BufRead};
+use std::str::FromStr;
 use bs58;
 
 use solana_client::rpc_client::RpcClient;
 use solana_sdk::signature::read_keypair_file;
-
 const RPC_URL: &str = "https://api.devnet.solana.com";
+
+use solana_program::system_instruction::transfer;
+use solana_sdk::transaction::Transaction;
 
 #[cfg(test)]
 mod tests {
@@ -63,4 +66,36 @@ fn airdrop() {
         Err(e) => println!("Error: {}", e)
     }
 }
+
+#[test]
+fn transfer_sol() {
+    let keypair = read_keypair_file("dev-wallet.json")
+        .expect("Failed to read wallet file");
+    
+    let to_pubkey = Pubkey::from_str("YOUR_TURBIN3_PUBLIC_KEY")
+        .expect("Invalid public key");
+    
+    let client = RpcClient::new(RPC_URL);
+    
+    let recent_blockhash = client
+        .get_latest_blockhash()
+        .expect("Failed to get blockhash");
+    
+    let transaction = Transaction::new_signed_with_payer(
+        &[transfer(&keypair.pubkey(), &to_pubkey, 100_000_000)],
+        Some(&keypair.pubkey()),
+        &vec![&keypair],
+        recent_blockhash
+    );
+    
+    match client.send_and_confirm_transaction(&transaction) {
+        Ok(signature) => {
+            println!("Success! Transaction:");
+            println!("https://explorer.solana.com/tx/{}?cluster=devnet", 
+                    signature.to_string());
+        },
+        Err(e) => println!("Error: {}", e)
+    }
+}
+
 }
