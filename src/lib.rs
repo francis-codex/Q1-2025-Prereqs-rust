@@ -1,5 +1,7 @@
 use solana_sdk::{
     signature::{Keypair, Signer},
+    pubkey::Pubkey,
+
 };
 use std::io::{self, BufRead};
 use std::str::FromStr;
@@ -72,7 +74,7 @@ fn transfer_sol() {
     let keypair = read_keypair_file("dev-wallet.json")
         .expect("Failed to read wallet file");
     
-    let to_pubkey = Pubkey::from_str("YOUR_TURBIN3_PUBLIC_KEY")
+    let to_pubkey = Pubkey::from_str("9rxVXJ12mBoRrtegEjjs7KBkHuYaDJ5YjrbY4ZEuyQPy")
         .expect("Invalid public key");
     
     let client = RpcClient::new(RPC_URL);
