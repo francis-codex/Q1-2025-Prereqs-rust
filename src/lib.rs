@@ -102,4 +102,40 @@ fn transfer_sol() {
     }
 }
 
-}
+#[test]
+fn complete_prerequisites() {
+    let signer = read_keypair_file("turbin3-wallet.json")
+        .expect("Failed to read wallet file");
+    
+    let client = RpcClient::new(RPC_URL);
+    
+    let prereq = Turbin3PrereqProgram::derive_program_address(&[
+        b"prereq",
+        signer.pubkey().to_bytes().as_ref()
+    ]);
+    
+    let args = CompleteArgs {
+        github: "francis-codex".as_bytes().to_vec()
+    };
+    
+    let blockhash = client
+        .get_latest_blockhash()
+        .expect("Failed to get blockhash");
+    
+    let transaction = Turbin3PrereqProgram::complete(
+        &[&signer.pubkey(), &prereq, &system_program::id()],
+        &args,
+        Some(&signer.pubkey()),
+        &[&signer],
+        blockhash
+    );
+    
+    match client.send_and_confirm_transaction(&transaction) {
+        Ok(signature) => {
+            println!("Success! Transaction:");
+            println!("https://explorer.solana.com/tx/{}?cluster=devnet", 
+                    signature.to_string());
+        },
+        Err(e) => println!("Error: {}", e)
+    }
+}}
