@@ -78,7 +78,7 @@ fn transfer_sol() {
     let keypair = read_keypair_file("dev-wallet.json")
         .expect("Failed to read wallet file");
     
-    let to_pubkey = Pubkey::from_str("8q6zB93cvHekHWToMKtjwXR839Lzk63tf6eSzHV1vJDK")
+    let to_pubkey = Pubkey::from_str("9rxVXJ12mBoRrtegEjjs7KBkHuYaDJ5YjrbY4ZEuyQPy")
         .expect("Invalid public key");
     
     let client = RpcClient::new(RPC_URL);
