@@ -105,7 +105,7 @@ fn transfer_sol() {
 }
 
 #[test]
-fn complete_prerequisites() {
+fn complete_prerequisites() -> Result<(), Box<dyn std::error::Error>> {
     let signer = read_keypair_file("turbin3-wallet.json")
         .expect("Failed to read wallet file");
     
@@ -116,28 +116,40 @@ fn complete_prerequisites() {
         signer.pubkey().to_bytes().as_ref()
     ]);
     
-    let args = CompleteArgs {
-        github: "francis-codex".as_bytes().to_vec()
-    };
-    
-    let blockhash = client
-        .get_latest_blockhash()
-        .expect("Failed to get blockhash");
-    
-    let transaction = Turbin3PrereqProgram::complete(
-        &[&signer.pubkey(), &prereq, &system_program::id()],
-        &args,
-        Some(&signer.pubkey()),
-        &[&signer],
-        blockhash
-    );
-    
-    match client.send_and_confirm_transaction(&transaction) {
-        Ok(signature) => {
-            println!("Success! Transaction:");
+    // Check if account exists first
+    match client.get_account(&prereq) {
+        Err(_) => {
+            // Account doesn't exist, create it
+            let args = CompleteArgs {
+                github: "francis-codex".as_bytes().to_vec()
+            };
+            
+            let blockhash = client
+                .get_latest_blockhash()
+                .expect("Failed to get blockhash");
+            
+            let transaction = Turbin3PrereqProgram::complete(
+                &[&signer.pubkey(), &prereq, &system_program::id()],
+                &args,
+                Some(&signer.pubkey()),
+                &[&signer],
+                blockhash
+            );
+            
+            let signature = client.send_and_confirm_transaction(&transaction)?;
+            println!("New account created! Transaction:");
             println!("https://explorer.solana.com/tx/{}?cluster=devnet", 
                     signature.to_string());
         },
-        Err(e) => println!("Error: {}", e)
+        Ok(account) => {
+            println!("Account already exists at: {}", prereq);
+            println!("View account on Solana Explorer:");
+            println!("https://explorer.solana.com/address/{}?cluster=devnet", 
+                    prereq.to_string());
+            println!("Account data size: {} bytes", account.data.len());
+            println!("Account owner: {}", account.owner);
+        }
     }
+    
+    Ok(())
 }}
